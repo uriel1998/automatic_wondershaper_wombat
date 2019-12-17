@@ -6,7 +6,7 @@
 quitting=""
 
 if [ $# = 2 ];then # two arguments from Network Manager
-    if [ ! -z "$1" ];then
+    if [ -n "$1" ];then
         interface="$1"
     fi
     case "$2" in
@@ -26,7 +26,7 @@ if [ ! -f /tmp/autobandwidth.pid ];then
     echo "$$" > /tmp/autobandwidth.pid
     # Pausing while load is above two so that load does not 
     MyLoad=$(cat /proc/loadavg | awk '{print $1}')
-    while [[ "$MyLoad" > 2 ]];do                      ####EDIT THIS LINE FOR LOAD CHANGES
+    while (( $(echo "$MyLoad > 2" |bc -l) )); do ####EDIT THIS LINE FOR LOAD CHANGES
         echo "Waiting for load to drop below 2"
         sleep 20s
         echo "."

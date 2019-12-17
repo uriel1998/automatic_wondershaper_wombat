@@ -100,8 +100,8 @@ Network Manager) find the active link, measure bandwidth using speedtest-cli,
 and then shape your internet traffic to 85% of measured bandwidth.
 
 It waits until the load is less than 2 before running; this is hardcoded in 
-the script.  It's line 29: `while [[ "$MyLoad" > 2 ]];do`.  Change 2 if you 
-want or need to.
+the script.  It's line 29: `while (( $(echo "$MyLoad > 2" |bc -l) )); do`.  
+Change 2 if you want or need to.
 
 If you run `autobandwidth` without any arguments, it will look for links that 
 are up.  It will choose the first ethernet link first, and if there's no wired 
