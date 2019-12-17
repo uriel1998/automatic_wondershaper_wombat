@@ -17,7 +17,7 @@ your high LAN network speeds).
 
 A script in bash (with some assorted tools) to automagically shape network 
 traffic using a modified version of the wondershaper script (and maintaining 
-your high LAN network speeds).
+your high LAN network speeds).  This is a per-machine setup.
 
 It is designed to be run under Network Manager, but can be invoked manually 
 (or from a cron job).
@@ -117,3 +117,6 @@ replacing the link names with your own.
 
 This might also be useful to run as a cronjob if your connection changes or is 
 funky.  
+
+It will output a minimal result to /tmp/bandwidthqueues as well if you wish to 
+use that data in conky, etc.

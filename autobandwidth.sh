@@ -59,9 +59,9 @@ if [ ! -f /tmp/autobandwidth.pid ];then
         if [ -z "$interface" ];then
             if [ -f /usr/bin/logger ];then
                 /usr/bin/logger "Autobandwidth unable to find appropriate interface; exiting"
-                echo "Autobandwidth unable to find appropriate interface; exiting"
+                echo "Autobandwidth unable to find appropriate interface; exiting" >&2
             else
-                echo "Autobandwidth unable to find appropriate interface; exiting"
+                echo "Autobandwidth unable to find appropriate interface; exiting" >&2
             fi
             rm -rf /tmp/autobandwidth.pid
             exit 99
@@ -89,12 +89,14 @@ if [ ! -f /tmp/autobandwidth.pid ];then
     up=$(echo "$measured" | tail -1)
     down=$(bc <<<"$down*100*85/100")
     up=$(bc <<<"$up*100*85/100")
-    if [ "$up" < 5 ] && [ "$down" < 5 ];then
+    if [ "$up" -lt 5 ] && [ "$down" -lt 5 ];then
         if [ -f /usr/bin/logger ];then
             /usr/bin/logger "Reported rates too low; exiting."
-            echo "Reported rates too low; exiting."
+            echo "Reported rates too low; exiting." >&2
+            exit 98
         else
-            echo "Reported rates too low; exiting."
+            echo "Reported rates too low; exiting." >&2
+            exit 98
         fi
     fi
     command=$(printf "sudo wondershaper %s %s %s" "$interface" "$down" "$up")
@@ -105,5 +107,6 @@ if [ ! -f /tmp/autobandwidth.pid ];then
         echo "Adjusting queues on $interface to $down / $up"
     fi
     eval "$command"
+    printf "%s: %s/%s" "$interface" "$down" "$up" > /tmp/bandwidthqueues
     rm -rf /tmp/autobandwidth.pid
 fi
