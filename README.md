@@ -88,7 +88,11 @@ so that the directory exists if it's not already there.  Then type
 
 `sudo cp ./autobandwidth.sh /etc/NetworkManager/dispatcher.d/60-autobandwidth`
 
-to copy the script.
+to copy the script.  Then, finally, 
+
+`sudo chown root:root /etc/NetworkManager/dispatcher.d/60-autobandwidth`
+
+If it isn't owned by root, NetworkManager won't touch it.
 
 If you're using it manually, copy it (or create a symlink to) somewhere in your `$PATH`.
 
