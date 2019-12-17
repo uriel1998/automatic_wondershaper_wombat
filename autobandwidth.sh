@@ -85,10 +85,10 @@ if [ ! -f /tmp/autobandwidth.pid ];then
     sudo wondershaper clear "$interface"  # in case there's a leftover queue
     echo "Getting network speed on $interface; this takes a few seconds."
     measured=$(/usr/bin/speedtest-cli --simple | awk -F ':' '{print $2}' | awk '{print $1}' | tail -2)
-    down=$(echo "$measured" | head -1)
-    up=$(echo "$measured" | tail -1)
-    down=$(bc <<<"$down*1000*85/100")
-    up=$(bc <<<"$up*1000*85/100")
+    odown=$(echo "$measured" | head -1)
+    oup=$(echo "$measured" | tail -1)
+    down=$(bc <<<"$odown*1000*85/100")
+    up=$(bc <<<"$oup*1000*85/100")
     if [ "$up" -lt 5 ] && [ "$down" -lt 5 ];then
         if [ -f /usr/bin/logger ];then
             /usr/bin/logger "Reported rates too low; exiting."
@@ -101,10 +101,10 @@ if [ ! -f /tmp/autobandwidth.pid ];then
     fi
     command=$(printf "sudo wondershaper %s %s %s" "$interface" "$down" "$up")
     if [ -f /usr/bin/logger ];then
-        /usr/bin/logger "Adjusting queues on $interface to $down / $up"
-        echo "Adjusting queues on $interface to $down / $up"
+        /usr/bin/logger "Logged $odown / $oup - Adjusting queues on $interface to $down / $up"
+        echo "Logged $odown / $oup - Adjusting queues on $interface to $down / $up"
     else
-        echo "Adjusting queues on $interface to $down / $up"
+        echo "Logged $odown / $oup - Adjusting queues on $interface to $down / $up"
     fi
     eval "$command"
     printf "%s: %s/%s" "$interface" "$down" "$up" > /tmp/bandwidthqueues
