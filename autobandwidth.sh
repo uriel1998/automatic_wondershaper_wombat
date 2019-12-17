@@ -87,8 +87,8 @@ if [ ! -f /tmp/autobandwidth.pid ];then
     measured=$(/usr/bin/speedtest-cli --simple | awk -F ':' '{print $2}' | awk '{print $1}' | tail -2)
     down=$(echo "$measured" | head -1)
     up=$(echo "$measured" | tail -1)
-    down=$(bc <<<"$down*100*85/100")
-    up=$(bc <<<"$up*100*85/100")
+    down=$(bc <<<"$down*1000*85/100")
+    up=$(bc <<<"$up*1000*85/100")
     if [ "$up" -lt 5 ] && [ "$down" -lt 5 ];then
         if [ -f /usr/bin/logger ];then
             /usr/bin/logger "Reported rates too low; exiting."
