@@ -3,8 +3,15 @@
 # if being called by Network Manager, the first argument is the interface, 
 # the second the action that has just happened.
 
+# We don't need to call this with connectivity-change
+
+if [ "$1" = "connectivity-change" ];then
+    exit 1
+fi
+
 # The old version of wondershaper didn't have a version switch. The git 
 # version does, so that's how we know how to format the command line.
+
 
 OldOrNewWonderShaper=$(wondershaper -v | grep -c "Version")
 
