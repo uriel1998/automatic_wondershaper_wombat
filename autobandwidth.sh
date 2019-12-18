@@ -3,8 +3,6 @@
 # if being called by Network Manager, the first argument is the interface, 
 # the second the action that has just happened.
 
-
-
 # The old version of wondershaper didn't have a version switch. The git 
 # version does, so that's how we know how to format the command line.
 
@@ -31,6 +29,10 @@ fi
 
 if [ ! -f /tmp/autobandwidth.pid ];then
     echo "$$" > /tmp/autobandwidth.pid
+    
+    # Pausing to let link handshakes finish, since this keeps getting called early...
+    sleep 10s
+    
     # Pausing while load is above two so that load does not 
     MyLoad=$(cat /proc/loadavg | awk '{print $1}')
     while (( $(echo "$MyLoad > 2" |bc -l) )); do ####EDIT THIS LINE FOR LOAD CHANGES
@@ -45,7 +47,7 @@ if [ ! -f /tmp/autobandwidth.pid ];then
     if [ -z "$interface" ];then
         interface=""
 
-        wired=$(ifconfig | grep -e "eno[0-9]" | grep -c -e "UP")
+        wired=$(ifconfig | grep -e "eno[0-9]" | grep -c -e "RUNNING")
 
         case $wired in
             0) echo "No wired connection found on eno[0-9]" ;;
@@ -54,7 +56,7 @@ if [ ! -f /tmp/autobandwidth.pid ];then
         esac
         
         if [ -z "$interface" ];then
-            wireless=$(ifconfig | grep -e "wlp[0-9]s[0-9]" | grep -c -e "UP")
+            wireless=$(ifconfig | grep -e "wlp[0-9]s[0-9]" | grep -c -e "RUNNING")
 
             case $wireless in
                 0) echo "No wired connection found on wlp[0-9]s[0-9]" ;;
@@ -92,6 +94,22 @@ if [ ! -f /tmp/autobandwidth.pid ];then
         exit 0
     fi
 
+    # Adding an additional check here; it was being called twice????
+
+    Running=$(ps aux | grep -v "grep" | grep -c "speedtest-cli")
+    
+    if [ "$Running" -gt 0 ];then
+        if [ -f /usr/bin/logger ];then
+            /usr/bin/logger "Speedtest is already running; exiting"
+            echo "Speedtest is already running; exiting"
+        else
+            echo "Speedtest is already running; exiting"
+        fi
+        exit 1
+    fi
+
+
+        
     # Got our interface and load is low enough, time to make the donuts.
     if [ "$OldOrNewWonderShaper" = 1 ];then
         sudo /sbin/wondershaper -c -a "$interface"  # in case there's a leftover queue

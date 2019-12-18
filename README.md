@@ -55,11 +55,11 @@ Optional:
 
 ### Installing wondershaper
 
-EDIT:  Of course, it's after I write all this up that someone points out to me 
+#IMPORTANT EDIT: Of course, it's after I write all this up that someone points out to me 
 that I was looking at an abandoned fork of `wondershaper`.  Please utilize 
 [this version of wondershaper](https://github.com/magnific0/wondershaper), and 
 redownload my script, as the command line switches have changed, and I corrected 
-for that.
+for that.  Still put it in `/sbin`, though, please.
 
 The wondershaper script is rather old, and has one big glaring omission - it 
 also rate-limits your LAN connectivity.  My modified copy, using [this guide](http://forums.opensuse.org/english/get-technical-help-here/network-internet/454307-wondershaper-modification-exclude-lan-should-included.html), changes the rate limit for LAN traffic to 85% of a 10MB link 
