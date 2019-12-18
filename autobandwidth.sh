@@ -3,6 +3,13 @@
 # if being called by Network Manager, the first argument is the interface, 
 # the second the action that has just happened.
 
+
+
+# The old version of wondershaper didn't have a version switch. The git 
+# version does, so that's how we know how to format the command line.
+
+OldOrNewWonderShaper=$(wondershaper -v | grep -c "Version")
+
 quitting=""
 
 if [ $# = 2 ];then # two arguments from Network Manager
@@ -76,13 +83,21 @@ if [ ! -f /tmp/autobandwidth.pid ];then
         else
             echo "Clearing wondershaper queues on $interface"
         fi
-        sudo wondershaper clear "$interface"
+        if [ "$OldOrNewWonderShaper" = 1 ];then
+            sudo /sbin/wondershaper -c -a "$interface"  # in case there's a leftover queue
+        else
+            sudo /sbin/wondershaper clear "$interface"  # in case there's a leftover queue
+        fi
         rm -rf /tmp/autobandwidth.pid
         exit 0
     fi
 
     # Got our interface and load is low enough, time to make the donuts.
-    sudo wondershaper clear "$interface"  # in case there's a leftover queue
+    if [ "$OldOrNewWonderShaper" = 1 ];then
+        sudo /sbin/wondershaper -c -a "$interface"  # in case there's a leftover queue
+    else
+        sudo /sbin/wondershaper clear "$interface"  # in case there's a leftover queue
+    fi
     echo "Getting network speed on $interface; this takes a few seconds."
     measured=$(/usr/bin/speedtest-cli --simple | awk -F ':' '{print $2}' | awk '{print $1}' | tail -2)
     odown=$(echo "$measured" | head -1)
@@ -99,7 +114,12 @@ if [ ! -f /tmp/autobandwidth.pid ];then
             exit 98
         fi
     fi
-    command=$(printf "sudo wondershaper %s %s %s" "$interface" "$down" "$up")
+    
+    if [ "$OldOrNewWonderShaper" = 1 ];then
+        command=$(printf "sudo /sbin/wondershaper -a %s -d %s -u %s" "$interface" "$down" "$up")
+    else
+        command=$(printf "sudo /sbin/wondershaper %s %s %s" "$interface" "$down" "$up")
+    fi
     if [ -f /usr/bin/logger ];then
         /usr/bin/logger "Logged $odown / $oup - Adjusting queues on $interface to $down / $up"
         echo "Logged $odown / $oup - Adjusting queues on $interface to $down / $up"
