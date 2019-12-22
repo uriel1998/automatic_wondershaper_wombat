@@ -40,6 +40,7 @@ if [ "$quitting" = "Yes" ] && [ $# = 2 ];then
         ABWPID=$(cat /tmp/autobandwidth.pid)
         rm -rf /tmp/autobandwidth.pid
         kill -9 "$ABWPID" &> /dev/null
+        rm -rf /tmp/bandwidthqueues
     fi
     if [ -f /usr/bin/logger ];then
         /usr/bin/logger "Clearing wondershaper queues on $interface"
@@ -64,20 +65,22 @@ if [ ! -f /tmp/autobandwidth.pid ];then
     fi
     
     # Pausing to let link handshakes finish, since this keeps getting called early...
-    sleep 10s
+	echo "Pausing for link handshake..."
+    sleep 30s
     
     # Pausing while load is above two so that load does not 
     MyLoad=$(cat /proc/loadavg | awk '{print $1}')
     while (( $(echo "$MyLoad > 2" |bc -l) )); do ####EDIT THIS LINE FOR LOAD CHANGES
-        echo "Waiting for load to drop below 2"
+        echo "Waiting for load - now $MyLoad - to drop below 2"
         sleep 20s
         echo "."
         MyLoad=$(cat /proc/loadavg | awk '{print $1}')
     done
 
-    # determining what interface is up if not passed to it by Network Manager.  
+	# determining what interface is up if not passed to it by Network Manager.  
     # Logic is wired first (and lowest number if multiple), then wireless the same way. 
     if [ -z "$interface" ];then
+    	echo "Determining active interface..."
         interface=""
 
         wired=$(ifconfig | grep -e "eno[0-9]" | grep -c -e "RUNNING")
@@ -115,6 +118,7 @@ if [ ! -f /tmp/autobandwidth.pid ];then
         if [ -f /tmp/autobandwidth.pid ];then
             ABWPID=$(cat /tmp/autobandwidth.pid)
             rm -rf /tmp/autobandwidth.pid
+            rm -rf /tmp/bandwidthqueues
             kill -9 "$ABWPID" &> /dev/null
         fi
 
