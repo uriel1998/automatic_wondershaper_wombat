@@ -34,8 +34,34 @@ if [ $# = 1 ];then # standalone to quit
     fi
 fi
 
+
+if [ "$quitting" = "Yes" ] && [ $# = 2 ];then
+    if [ -f /tmp/autobandwidth.pid ];then
+        ABWPID=$(cat /tmp/autobandwidth.pid)
+        rm -rf /tmp/autobandwidth.pid
+        kill -9 "$ABWPID" &> /dev/null
+    fi
+    if [ -f /usr/bin/logger ];then
+        /usr/bin/logger "Clearing wondershaper queues on $interface"
+        echo "Clearing wondershaper queues on $interface"
+    else
+        echo "Clearing wondershaper queues on $interface"
+    fi
+    if [ "$OldOrNewWonderShaper" = 1 ];then
+        sudo /sbin/wondershaper -c -a "$interface"  # in case there's a leftover queue
+    else
+        sudo /sbin/wondershaper clear "$interface"  # in case there's a leftover queue
+    fi
+    exit 0
+fi
+
+
+
 if [ ! -f /tmp/autobandwidth.pid ];then
-    echo "$$" > /tmp/autobandwidth.pid
+
+    if [ "$quitting" != "Yes" ];then
+        echo "$$" > /tmp/autobandwidth.pid
+    fi
     
     # Pausing to let link handshakes finish, since this keeps getting called early...
     sleep 10s
@@ -86,6 +112,12 @@ if [ ! -f /tmp/autobandwidth.pid ];then
     
     
     if [ "$quitting" = "Yes" ];then
+        if [ -f /tmp/autobandwidth.pid ];then
+            ABWPID=$(cat /tmp/autobandwidth.pid)
+            rm -rf /tmp/autobandwidth.pid
+            kill -9 "$ABWPID" &> /dev/null
+        fi
+
         if [ -f /usr/bin/logger ];then
             /usr/bin/logger "Clearing wondershaper queues on $interface"
             echo "Clearing wondershaper queues on $interface"
